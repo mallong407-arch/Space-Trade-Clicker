@@ -1,212 +1,287 @@
- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Space Trade Clicker V5 - Rebirth Update</title>
+<title>Space Trade Clicker V5</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:black;
-  color:#0ff;
-  overflow:hidden;
-  position:relative;
-}
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #050505;
+    color: #0ff;
+    overflow: hidden;
+    user-select: none;
+  }
 
-/* Starfield background */
-#starfield{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  z-index:-1;
-}
+  /* Starfield background */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+  }
 
-#topBar{
-  position:absolute;
-  top:10px;
-  left:20px;
-  font-size:18px;
-}
+  /* Layout Containers */
+  #gameContainer {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
 
-#gameTitle{
-  position:absolute;
-  top:10px;
-  right:20px;
-  font-size:26px;
-  text-shadow:0 0 10px #0ff;
-}
+  #topBar {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 18px;
+    z-index: 10;
+  }
 
-#resetTimer{
-  position:absolute;
-  top:45px;
-  right:20px;
-  font-size:16px;
-}
+  #gameTitle {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 26px;
+    text-shadow: 0 0 10px #0ff;
+    z-index: 10;
+  }
 
-#leftPanel{
-  position:fixed;
-  left:50px;
-  top:50%;
-  transform:translateY(-50%);
-  text-align:center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  /* Left Panel: The Clicker */
+  #leftPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 2px solid rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+  }
 
-#middlePanel{
-  position:fixed;
-  left:350px;
-  top:110px;
-  width:40%;
-  max-height:calc(100vh - 130px);
-  overflow-y:auto;
-}
+  #ship {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #0ff 0%, #005555 70%);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 30px #0ff;
+    transition: transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    font-size: 1.2rem;
+  }
 
-#coinBtn{
-  width:250px;
-  height:250px;
-  border-radius:50%;
-  border:none;
-  position:relative;
-  cursor:pointer;
-  transition:all 0.2s;
-  display:block;
-  mix-blend-mode:screen;
-}
+  #ship:active {
+    transform: scale(0.95);
+  }
 
-/* REBIRTH STYLES */
-#rebirthBtn {
-  background: #0044ff;
-  color: white;
-  border: 2px solid #0ff;
-  padding: 12px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 20px;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-  transition: transform 0.2s;
-}
+  /* Middle Panel: Upgrades */
+  #middlePanel {
+    flex: 1.5;
+    padding: 100px 40px 40px 40px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #0ff transparent;
+  }
 
-#rebirthBtn:hover {
-  transform: scale(1.05);
-  background: #0066ff;
-}
+  .upgrade-card {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid #0ff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+  }
 
-#rebirthProgressContainer {
-  width: 200px;
-  height: 15px;
-  background: #222;
-  border: 1px solid #0ff;
-  border-radius: 10px;
-  margin-top: 10px;
-  overflow: hidden;
-}
+  .upgrade-card:hover {
+    background: rgba(0, 255, 255, 0.15);
+  }
 
-#rebirthProgressBar {
-  width: 30%; /* Example progress */
-  height: 100%;
-  background: #0ff;
-  box-shadow: 0 0 10px #0ff;
-}
+  .upgrade-card button {
+    background: #0ff;
+    color: black;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 
-/* MODAL STYLES */
-#rebirthModal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.8);
-}
+  .upgrade-card button:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
 
-.modal-content {
-  background-color: #333;
-  margin: 15% auto;
-  padding: 40px;
-  border: 3px solid #0ff; /* Neon Blue Outline */
-  width: 300px;
-  border-radius: 20px; /* Rounded Corners */
-  text-align: center;
-  position: relative;
-  color: white;
-  box-shadow: 0 0 20px #0ff;
-}
+  /* Stats and UI */
+  .stat-val {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px #0ff;
+  }
 
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  color: #aaa;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close-btn:hover { color: #ff0000; }
-
-/* Rest of your existing CSS would go here... */
+  #resetTimer {
+    position: absolute;
+    top: 45px;
+    right: 20px;
+    font-size: 14px;
+    color: #f0f;
+  }
 </style>
 </head>
 <body>
 
 <canvas id="starfield"></canvas>
-<div id="topBar">Coins: <span id="coins">0</span> | CPS: <span id="cps">0</span></div>
-<div id="gameTitle">🚀 Space Trade Clicker</div>
 
-<div id="leftPanel">
-  <img id="coinBtn" src="data:image/png;base64,..." onclick="clickCoin()">
-  
-  <button id="rebirthBtn" onclick="openRebirth()">Rebirth</button>
-  <div id="rebirthProgressContainer">
-    <div id="rebirthProgressBar"></div>
-  </div>
+<div id="topBar">
+  Credits: <span id="coins" class="stat-val">0</span><br>
+  Income: <span id="cps" class="stat-val">0.0</span> /s
 </div>
 
-<div id="rebirthModal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeRebirth()">&times;</span>
-    <p style="font-size: 20px;">Currently in development</p>
+<div id="gameTitle">NEBULA TRADER V5</div>
+<div id="resetTimer">Next Cycle: <span id="timer">60</span>s</div>
+
+<div id="gameContainer">
+  <div id="leftPanel">
+    <div id="ship" onclick="clickShip()">MINE ORE</div>
+    <p>Click the core to generate credits</p>
+  </div>
+
+  <div id="middlePanel">
+    <div id="upgradesList">
+      </div>
   </div>
 </div>
 
 <script>
-// Your existing game data and logic...
+// Game State
 let data = {
-    coins: 0,
-    idle: 0
+  coins: 0,
+  idle: 0,
+  clickPower: 1,
+  upgrades: [
+    { id: 0, name: "Auto-Drill", cost: 15, income: 0.5, count: 0 },
+    { id: 1, name: "Cargo Sloop", cost: 100, income: 3, count: 0 },
+    { id: 2, name: "Trade Station", cost: 500, income: 10, count: 0 },
+    { id: 3, name: "Warp Gate", cost: 2500, income: 50, count: 0 }
+  ]
 };
 
-function clickCoin() {
-    data.coins++;
-    update();
+// Core Logic
+function clickShip() {
+  data.coins += data.clickPower;
+  updateUI();
 }
 
-function update() {
-    document.getElementById('coins').innerText = Math.floor(data.coins);
+function buyUpgrade(id) {
+  const up = data.upgrades[id];
+  if (data.coins >= up.cost) {
+    data.coins -= up.cost;
+    up.count++;
+    up.cost = Math.floor(up.cost * 1.15); // Scale cost
+    calculateIncome();
+    renderUpgrades();
+    updateUI();
+  }
 }
 
-// REBIRTH FUNCTIONS
-function openRebirth() {
-    document.getElementById('rebirthModal').style.display = "block";
+function calculateIncome() {
+  data.idle = data.upgrades.reduce((sum, up) => sum + (up.income * up.count), 0);
 }
 
-function closeRebirth() {
-    document.getElementById('rebirthModal').style.display = "none";
+// Timer Logic
+let timeLeft = 60;
+setInterval(() => {
+  timeLeft--;
+  if (timeLeft < 0) timeLeft = 60;
+  document.getElementById('timer').innerText = timeLeft;
+}, 1000);
+
+// Game Loop
+setInterval(() => {
+  data.coins += (data.idle / 10);
+  updateUI();
+}, 100);
+
+function updateUI() {
+  document.getElementById('coins').innerText = Math.floor(data.coins);
+  document.getElementById('cps').innerText = data.idle.toFixed(1);
+  
+  // Update button states
+  data.upgrades.forEach(up => {
+    const btn = document.getElementById(`btn-${up.id}`);
+    if (btn) btn.disabled = data.coins < up.cost;
+  });
 }
 
-// Close modal if clicking outside of it
-window.onclick = function(event) {
-    let modal = document.getElementById('rebirthModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
+function renderUpgrades() {
+  const container = document.getElementById('upgradesList');
+  container.innerHTML = data.upgrades.map(up => `
+    <div class="upgrade-card">
+      <div>
+        <strong>${up.name}</strong> (Owned: ${up.count})<br>
+        <small>Adds ${up.income} income/s</small>
+      </div>
+      <button id="btn-${up.id}" onclick="buyUpgrade(${up.id})">
+        Buy: ${up.cost}
+      </button>
+    </div>
+  `).join('');
+}
+
+// Starfield Background
+function createStarfield() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5 + 0.1
+      });
     }
+  }
+
+  function animate() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    
+    stars.forEach(star => {
+      star.y += star.speed;
+      if (star.y > canvas.height) star.y = 0;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  animate();
 }
+
+// Init
+window.onload = () => {
+  createStarfield();
+  renderUpgrades();
+};
 </script>
 </body>
 </html>
